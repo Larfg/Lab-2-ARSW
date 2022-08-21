@@ -36,14 +36,18 @@ public class MainCanodromo {
                                     galgos[i] = new Galgo(can.getCarril(i), "" + i, reg);
                                     //inicia los hilos
                                     galgos[i].start();
-
                                 }
-                               
-				can.winnerDialog(reg.getGanador(),reg.getUltimaPosicionAlcanzada() - 1); 
+                                for (int i = 0; i < can.getNumCarriles(); i++) {
+                                    try {
+                                        galgos[i].join();
+                                    } catch (InterruptedException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                }
+				can.winnerDialog(reg.getGanador(),reg.getUltimaPosicionAlcanzada() - 1);
                                 System.out.println("El ganador fue:" + reg.getGanador());
                             }
                         }.start();
-
                     }
                 }
         );
@@ -52,6 +56,13 @@ public class MainCanodromo {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        for(Galgo galgo: galgos){
+                            try {
+                                galgo.espere();
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
                         System.out.println("Carrera pausada!");
                     }
                 }
@@ -61,11 +72,12 @@ public class MainCanodromo {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        for(Galgo galgo: galgos){
+                            galgo.siga();
+                        }
                         System.out.println("Carrera reanudada!");
                     }
                 }
         );
-
     }
-
 }

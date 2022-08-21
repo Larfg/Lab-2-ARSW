@@ -9,6 +9,7 @@ public class PrimeFinderThread extends Thread{
 
 	
 	int a,b;
+	boolean suspend = false;
 	
 	private List<Integer> primes=new LinkedList<Integer>();
 	
@@ -20,35 +21,15 @@ public class PrimeFinderThread extends Thread{
 
 
 	public void run(){
-		Timer timer = new Timer();
-
 		for (int i = a; i <= b; i++) {
 			if (isPrime(i)) {
 				primes.add(i);
 				System.out.println(i);
+				suspendido();
 			}
 		}
-		TimerTask esperar = new TimerTask() {
-			@Override
-			public void run() {
-				synchronized (this){
-					try {
-						parar();
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		};
-
-		timer.schedule(esperar,1000);
-
-
 	}
 
-
-
-	
 	boolean isPrime(int n) {
 	    if (n%2==0) return false;
 	    for(int i=3;i*i<=n;i+=2) {
@@ -58,18 +39,30 @@ public class PrimeFinderThread extends Thread{
 	    return true;
 	}
 
-	public void parar() throws InterruptedException {
-		wait(10000);
-	}
-	Integer primes(){
+	public Integer primes(){
 		return getPrimes().size();
 	}
 
 	public List<Integer> getPrimes() {
 		return primes;
 	}
-	
-	
-	
-	
+
+
+	public void suspender() {
+		suspend = true;
+	}
+	public synchronized void reanudar(){
+		suspend = false;
+		notifyAll();
+	}
+
+	public synchronized void suspendido(){
+		while(suspend){
+			try {
+				wait();
+			}catch (InterruptedException e){
+				e.printStackTrace();
+			}
+		}
+	}
 }
